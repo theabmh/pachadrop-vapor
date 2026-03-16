@@ -1,5 +1,22 @@
 import Vapor
 
+struct CartResponse: Content {
+    struct Item: Content {
+        let id: UUID
+        let productId: UUID
+        let productName: String
+        let productPrice: Double
+        let quantity: Int
+        let subtotal: Double
+    }
+
+    let id: UUID
+    let items: [Item]
+    let total: Double
+    let createdAt: Date?
+    let updatedAt: Date?
+}
+
 struct AddCartItemRequest: Content {
     let productId: UUID
     let quantity: Int

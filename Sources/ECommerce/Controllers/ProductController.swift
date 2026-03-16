@@ -1,8 +1,9 @@
 import Vapor
+import Fluent
 
 struct ProductController: RouteCollection {
     func boot(routes: RoutesBuilder) throws {
-        let products = routes.grouped("api", "products")
+        let products = routes.grouped("api", "v1", "products")
 
         // Public endpoints
         products.get(use: list)
@@ -16,46 +17,62 @@ struct ProductController: RouteCollection {
         admin.delete(":id", use: delete)
     }
 
-    func list(req: Request) async throws -> [ProductResponse] {
-        let limit = req.query[Int.self, at: "limit"] ?? 20
-        let offset = req.query[Int.self, at: "offset"] ?? 0
+    func list(req: Request) async throws -> BaseResponseModel<PaginatedData<ProductResponse>> {
+        let page = req.query[Int.self, at: "page"] ?? 1
+        let perPage = min(req.query[Int.self, at: "per_page"] ?? 20, 100)
         let categoryId = req.query[String.self, at: "category_id"]
 
-        var products = try await Product.query(on: req.db).all()
+        var query = Product.query(on: req.db)
 
         if let categoryId = categoryId, let uuid = UUID(uuidString: categoryId) {
-            products = products.filter { $0.$category.id == uuid }
+            query = query.filter(\.$category.$id == uuid)
         }
 
-        // Apply pagination
-        let paginatedProducts = Array(products.dropFirst(offset).prefix(limit))
+        let total = try await query.count()
+        let products = try await query
+            .range(((page - 1) * perPage)..<((page - 1) * perPage + perPage))
+            .all()
 
-        return paginatedProducts.map { ProductResponse(from: $0) }
+        let items = products.map { ProductResponse(from: $0) }
+        let totalPages = max(1, Int(ceil(Double(total) / Double(perPage))))
+
+        let paginated = PaginatedData(
+            items: items,
+            total: total,
+            page: page,
+            perPage: perPage,
+            totalPages: totalPages
+        )
+
+        return .success(paginated, message: "Products retrieved successfully")
     }
 
-    func get(req: Request) async throws -> ProductResponse {
+    func get(req: Request) async throws -> BaseResponseModel<ProductResponse> {
         guard let id = req.parameters.get("id", as: UUID.self) else {
             throw Abort(.badRequest, reason: "Invalid product ID")
         }
 
         guard let product = try await Product.find(id, on: req.db) else {
-            throw Abort(.notFound)
+            throw Abort(.notFound, reason: "Product not found")
         }
 
-        return ProductResponse(from: product)
+        return .success(ProductResponse(from: product), message: "Product retrieved successfully")
     }
 
-    func create(req: Request) async throws -> ProductResponse {
+    func create(req: Request) async throws -> BaseResponseModel<ProductResponse> {
+        try CreateProductRequest.validate(content: req)
         let createReq = try req.content.decode(CreateProductRequest.self)
 
-        guard !createReq.name.isEmpty else {
-            throw Abort(.badRequest, reason: "Product name is required")
-        }
         guard createReq.price > 0 else {
             throw Abort(.badRequest, reason: "Price must be greater than 0")
         }
         guard createReq.stockQuantity >= 0 else {
             throw Abort(.badRequest, reason: "Stock quantity cannot be negative")
+        }
+
+        // Verify category exists
+        guard try await Category.find(createReq.categoryId, on: req.db) != nil else {
+            throw Abort(.badRequest, reason: "Category not found")
         }
 
         let product = Product(
@@ -69,16 +86,16 @@ struct ProductController: RouteCollection {
 
         try await product.save(on: req.db)
 
-        return ProductResponse(from: product)
+        return .created(ProductResponse(from: product), message: "Product created successfully")
     }
 
-    func update(req: Request) async throws -> ProductResponse {
+    func update(req: Request) async throws -> BaseResponseModel<ProductResponse> {
         guard let id = req.parameters.get("id", as: UUID.self) else {
             throw Abort(.badRequest, reason: "Invalid product ID")
         }
 
         guard let product = try await Product.find(id, on: req.db) else {
-            throw Abort(.notFound)
+            throw Abort(.notFound, reason: "Product not found")
         }
 
         let updateReq = try req.content.decode(UpdateProductRequest.self)
@@ -107,20 +124,20 @@ struct ProductController: RouteCollection {
 
         try await product.update(on: req.db)
 
-        return ProductResponse(from: product)
+        return .success(ProductResponse(from: product), message: "Product updated successfully")
     }
 
-    func delete(req: Request) async throws -> HTTPStatus {
+    func delete(req: Request) async throws -> BaseResponseModel<EmptyData> {
         guard let id = req.parameters.get("id", as: UUID.self) else {
             throw Abort(.badRequest, reason: "Invalid product ID")
         }
 
         guard let product = try await Product.find(id, on: req.db) else {
-            throw Abort(.notFound)
+            throw Abort(.notFound, reason: "Product not found")
         }
 
         try await product.delete(on: req.db)
 
-        return .noContent
+        return .noContent(message: "Product deleted successfully")
     }
 }

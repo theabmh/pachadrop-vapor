@@ -4,11 +4,48 @@ import FluentPostgresDriver
 import JWT
 
 public func configure(_ app: Application) async throws {
-    // Configure JWT
-    let jwtSecret = Environment.get("JWT_SECRET") ?? "your-secret-key-change-me"
+    // Remove default error middleware and use our custom one
+    app.middleware = .init()
+    app.middleware.use(AppErrorMiddleware())
+    app.middleware.use(RequestLoggingMiddleware())
+
+    // Configure CORS
+    let corsConfiguration = CORSMiddleware.Configuration(
+        allowedOrigin: .all,
+        allowedMethods: [.GET, .POST, .PUT, .DELETE, .PATCH, .OPTIONS],
+        allowedHeaders: [
+            .accept, .authorization, .contentType, .origin,
+            .xRequestedWith, .init("X-Request-ID")
+        ],
+        allowCredentials: true
+    )
+    app.middleware.use(CORSMiddleware(configuration: corsConfiguration))
+
+    // Configure JWT — fail if no secret in production
+    guard let jwtSecret = Environment.get("JWT_SECRET") else {
+        if app.environment == .production {
+            fatalError("JWT_SECRET environment variable is required in production")
+        }
+        app.logger.warning("JWT_SECRET not set — using default development key")
+        app.jwt.signers.use(.hs256(key: "dev-secret-change-me-in-production"))
+        configureDatabase(app)
+        try await registerMigrations(app)
+        try routes(app)
+        return
+    }
     app.jwt.signers.use(.hs256(key: jwtSecret))
 
     // Configure PostgreSQL database
+    configureDatabase(app)
+
+    // Register migrations
+    try await registerMigrations(app)
+
+    // Register routes
+    try routes(app)
+}
+
+private func configureDatabase(_ app: Application) {
     let hostname = Environment.get("DATABASE_HOST") ?? "localhost"
     let port = Int(Environment.get("DATABASE_PORT") ?? "5432") ?? 5432
     let username = Environment.get("DATABASE_USERNAME") ?? "postgres"
@@ -25,8 +62,9 @@ public func configure(_ app: Application) async throws {
         ),
         as: .psql
     )
+}
 
-    // Register migrations
+private func registerMigrations(_ app: Application) async throws {
     app.migrations.add(CreateUser())
     app.migrations.add(CreateCategory())
     app.migrations.add(CreateProduct())
@@ -35,10 +73,7 @@ public func configure(_ app: Application) async throws {
     app.migrations.add(CreateOrder())
     app.migrations.add(CreateOrderItem())
     app.migrations.add(SeedDatabase())
+    app.migrations.add(AddIndexes())
 
-    // Auto migrate on startup
     try await app.autoMigrate()
-
-    // Register routes
-    try routes(app)
 }

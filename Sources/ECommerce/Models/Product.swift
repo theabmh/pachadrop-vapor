@@ -31,6 +31,9 @@ final class Product: Model, Content {
     @Timestamp(key: "updated_at", on: .update)
     var updatedAt: Date?
 
+    @Timestamp(key: "deleted_at", on: .delete)
+    var deletedAt: Date?
+
     init() {}
 
     init(
@@ -52,26 +55,3 @@ final class Product: Model, Content {
     }
 }
 
-struct ProductResponse: Content {
-    let id: UUID
-    let name: String
-    let description: String
-    let price: Double
-    let stockQuantity: Int
-    let categoryId: UUID
-    let imageUrls: [String]
-    let createdAt: Date?
-    let updatedAt: Date?
-
-    init(from product: Product) {
-        self.id = product.id ?? UUID()
-        self.name = product.name
-        self.description = product.description
-        self.price = product.price
-        self.stockQuantity = product.stockQuantity
-        self.categoryId = product.$category.id
-        self.imageUrls = product.imageUrls
-        self.createdAt = product.createdAt
-        self.updatedAt = product.updatedAt
-    }
-}

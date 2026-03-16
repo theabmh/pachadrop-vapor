@@ -1,6 +1,6 @@
 import Vapor
 
-struct RegisterRequest: Content {
+struct RegisterRequest: Content, Validatable {
     let fullName: String
     let email: String
     let password: String
@@ -9,6 +9,12 @@ struct RegisterRequest: Content {
         case fullName = "full_name"
         case email
         case password
+    }
+
+    static func validations(_ validations: inout Validations) {
+        validations.add("full_name", as: String.self, is: !.empty, customFailureDescription: "Full name is required")
+        validations.add("email", as: String.self, is: .email, customFailureDescription: "A valid email is required")
+        validations.add("password", as: String.self, is: .count(6...), customFailureDescription: "Password must be at least 6 characters")
     }
 }
 
@@ -31,9 +37,4 @@ struct AuthResponse: Content {
         case role
         case token
     }
-}
-
-struct ErrorResponse: Content {
-    let error: String
-    let message: String?
 }

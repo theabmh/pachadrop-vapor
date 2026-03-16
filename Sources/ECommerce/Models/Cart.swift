@@ -16,6 +16,9 @@ final class Cart: Model, Content {
     @Timestamp(key: "updated_at", on: .update)
     var updatedAt: Date?
 
+    @Timestamp(key: "deleted_at", on: .delete)
+    var deletedAt: Date?
+
     init() {}
 
     init(id: UUID? = nil, userID: UUID) {
@@ -52,19 +55,3 @@ final class CartItem: Model, Content {
     }
 }
 
-struct CartResponse: Content {
-    struct Item: Content {
-        let id: UUID
-        let productId: UUID
-        let productName: String
-        let productPrice: Double
-        let quantity: Int
-        let subtotal: Double
-    }
-
-    let id: UUID
-    let items: [Item]
-    let total: Double
-    let createdAt: Date?
-    let updatedAt: Date?
-}

@@ -15,7 +15,7 @@ struct BearerAuthenticator: AsyncBearerAuthenticator {
             )
             request.auth.login(appUser)
         } catch {
-            throw Abort(.unauthorized)
+            throw Abort(.unauthorized, reason: "Invalid or expired token")
         }
     }
 }
@@ -26,22 +26,22 @@ struct AppUser: Authenticatable {
     let role: UserRole
 }
 
-final class RoleMiddleware: Middleware {
+struct RoleMiddleware: AsyncMiddleware {
     let requiredRoles: [UserRole]
 
     init(requiredRoles: [UserRole]) {
         self.requiredRoles = requiredRoles
     }
 
-    func respond(to request: Request, chainingTo next: Responder) -> EventLoopFuture<Response> {
+    func respond(to request: Request, chainingTo next: AsyncResponder) async throws -> Response {
         guard let user = request.auth.get(AppUser.self) else {
-            return request.eventLoop.makeFailedFuture(Abort(.unauthorized, reason: "User not authenticated"))
+            throw Abort(.unauthorized, reason: "User not authenticated")
         }
 
         guard requiredRoles.contains(user.role) else {
-            return request.eventLoop.makeFailedFuture(Abort(.forbidden, reason: "User does not have required role"))
+            throw Abort(.forbidden, reason: "User does not have required role")
         }
 
-        return next.respond(to: request)
+        return try await next.respond(to: request)
     }
 }

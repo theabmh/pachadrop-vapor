@@ -1,13 +1,14 @@
 import Fluent
+import Vapor
 import Foundation
 
 struct SeedDatabase: AsyncMigration {
     func prepare(on database: Database) async throws {
-        // Create admin user
+        // Create admin user with bcrypt-hashed password
         let adminUser = User(
             fullName: "Admin User",
             email: "admin@example.com",
-            passwordHash: "admin123", // In production, this should be hashed
+            passwordHash: try Bcrypt.hash("admin123"),
             role: .admin
         )
         try await adminUser.save(on: database)
@@ -65,9 +66,8 @@ struct SeedDatabase: AsyncMigration {
     }
 
     func revert(on database: Database) async throws {
-        // Delete seeded data if needed
-        try await Order.query(on: database).delete()
         try await OrderItem.query(on: database).delete()
+        try await Order.query(on: database).delete()
         try await CartItem.query(on: database).delete()
         try await Cart.query(on: database).delete()
         try await Product.query(on: database).delete()

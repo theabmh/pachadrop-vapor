@@ -1,37 +1,30 @@
 import Vapor
+import Fluent
 import JWT
 
 struct AuthController: RouteCollection {
     func boot(routes: RoutesBuilder) throws {
-        let auth = routes.grouped("api", "auth")
+        let auth = routes.grouped("api", "v1", "auth")
+            .grouped(RateLimitMiddleware(maxRequests: 10, windowSeconds: 60))
         auth.post("register", use: register)
         auth.post("login", use: login)
     }
 
-    func register(req: Request) async throws -> AuthResponse {
+    func register(req: Request) async throws -> BaseResponseModel<AuthResponse> {
+        try RegisterRequest.validate(content: req)
         let registerReq = try req.content.decode(RegisterRequest.self)
 
-        // Validate input
-        guard !registerReq.fullName.isEmpty else {
-            throw Abort(.badRequest, reason: "Full name is required")
-        }
-        guard !registerReq.email.isEmpty else {
-            throw Abort(.badRequest, reason: "Email is required")
-        }
-        guard !registerReq.password.isEmpty else {
-            throw Abort(.badRequest, reason: "Password is required")
-        }
-
-        // Check if email already exists
-        let existingUser = try await User.query(on: req.db).all()
-            .first { $0.email == registerReq.email }
+        // Check if email already exists using DB filter
+        let existingUser = try await User.query(on: req.db)
+            .filter(\.$email == registerReq.email)
+            .first()
 
         if existingUser != nil {
             throw Abort(.conflict, reason: "Email already registered")
         }
 
-        // Create new user
-        let passwordHash = registerReq.password // In production, use proper bcrypt hashing
+        // Hash password with bcrypt
+        let passwordHash = try Bcrypt.hash(registerReq.password)
         let user = User(
             fullName: registerReq.fullName,
             email: registerReq.email,
@@ -50,25 +43,28 @@ struct AuthController: RouteCollection {
         )
         let token = try req.jwt.sign(payload)
 
-        return AuthResponse(
+        let response = AuthResponse(
             userId: user.id ?? UUID(),
             email: user.email,
             fullName: user.fullName,
             role: user.role.rawValue,
             token: token
         )
+
+        return .created(response, message: "Registration successful")
     }
 
-    func login(req: Request) async throws -> AuthResponse {
+    func login(req: Request) async throws -> BaseResponseModel<AuthResponse> {
         let loginReq = try req.content.decode(LoginRequest.self)
 
-        guard let user = try await User.query(on: req.db).all()
-            .first(where: { $0.email == loginReq.email }) else {
+        guard let user = try await User.query(on: req.db)
+            .filter(\.$email == loginReq.email)
+            .first() else {
             throw Abort(.unauthorized, reason: "Invalid email or password")
         }
 
-        // Verify password
-        guard loginReq.password == user.passwordHash else {
+        // Verify password with bcrypt
+        guard try Bcrypt.verify(loginReq.password, created: user.passwordHash) else {
             throw Abort(.unauthorized, reason: "Invalid email or password")
         }
 
@@ -81,12 +77,14 @@ struct AuthController: RouteCollection {
         )
         let token = try req.jwt.sign(payload)
 
-        return AuthResponse(
+        let response = AuthResponse(
             userId: user.id ?? UUID(),
             email: user.email,
             fullName: user.fullName,
             role: user.role.rawValue,
             token: token
         )
+
+        return .success(response, message: "Login successful")
     }
 }

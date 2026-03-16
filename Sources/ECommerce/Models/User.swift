@@ -31,6 +31,9 @@ final class User: Model, Content {
     @Timestamp(key: "updated_at", on: .update)
     var updatedAt: Date?
 
+    @Timestamp(key: "deleted_at", on: .delete)
+    var deletedAt: Date?
+
     init() {}
 
     init(
@@ -70,6 +73,6 @@ extension User: ModelAuthenticatable {
     static let passwordHashKey = \User.$passwordHash
 
     func verify(password: String) throws -> Bool {
-        password == passwordHash
+        try Bcrypt.verify(password, created: passwordHash)
     }
 }

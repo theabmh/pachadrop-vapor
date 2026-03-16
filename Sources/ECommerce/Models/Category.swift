@@ -16,6 +16,9 @@ final class Category: Model, Content {
     @Timestamp(key: "created_at", on: .create)
     var createdAt: Date?
 
+    @Timestamp(key: "deleted_at", on: .delete)
+    var deletedAt: Date?
+
     init() {}
 
     init(id: UUID? = nil, name: String, description: String) {
