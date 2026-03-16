@@ -1,0 +1,24 @@
+{
+    "configurations": [
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:e-commerce}",
+            "name": "Debug ECommerce",
+            "target": "ECommerce",
+            "configuration": "debug",
+            "preLaunchTask": "swift: Build Debug ECommerce"
+        },
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:e-commerce}",
+            "name": "Release ECommerce",
+            "target": "ECommerce",
+            "configuration": "release",
+            "preLaunchTask": "swift: Build Release ECommerce"
+        }
+    ]
+}
