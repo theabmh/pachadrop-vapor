@@ -5,7 +5,17 @@
       "Bash(find:*)",
       "Bash(grep:*)",
       "Bash(git add:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(swift --version)",
+      "Bash(pg_isready)",
+      "Bash(psql --version)",
+      "Bash(docker --version)",
+      "Bash(docker info:*)",
+      "Bash(psql -U postgres -c l)",
+      "Bash(psql:*)",
+      "Bash(wait)",
+      "Bash(curl -s http://localhost:8080/health)",
+      "Bash(curl -s http://localhost:8080/)"
     ]
   }
 }

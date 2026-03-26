@@ -1,12 +1,106 @@
-Packages
-.build
-xcuserdata
-*.xcodeproj
+# ================================
+# Swift / Xcode
+# ================================
+.build/
+Packages/
 DerivedData/
-.DS_Store
-db.sqlite
-.swiftpm
+xcuserdata/
+*.xcodeproj/
+*.xcworkspace/
+*.xcuserstate
+*.xccheckout
+*.moved-aside
+*.pbxuser
+!default.pbxuser
+*.mode1v3
+!default.mode1v3
+*.mode2v3
+!default.mode2v3
+*.perspectivev3
+!default.perspectivev3
+*.profraw
+default.profraw
+*.resolved
+
+# SPM
+.swiftpm/xcode/
+.swiftpm/configuration/
+
+# ================================
+# Vapor / Server
+# ================================
 .env
 .env.*
 !.env.example
-default.profraw
+db.sqlite
+db.sqlite-shm
+db.sqlite-wal
+*.log
+Logs/
+logs/
+run/
+Public/uploads/
+Resources/Views/*.html
+
+# ================================
+# AI Agents / Claude
+# ================================
+.claude/settings.local.json
+.claude/projects/
+.claude/todos/
+toolbox/settings.local.json
+toolbox/PROMPT.md
+**/.claude/cache/
+**/.claude/logs/
+
+# ================================
+# Markdown — keep only key docs
+# ================================
+*.md
+!README.md
+!POSTMAN_GUIDE.md
+!agents.md
+!AGENTS.md
+!claude.md
+!CLAUDE.md
+!design.md
+!DESIGN.md
+
+# ================================
+# macOS
+# ================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V8
+.Trashes
+Icon?
+ehthumbs.db
+Thumbs.db
+.AppleDouble
+.LSOverride
+
+# ================================
+# Docker
+# ================================
+docker-compose.override.yml
+
+# ================================
+# IDE / Editor
+# ================================
+.vscode/settings.json
+.vscode/launch.json
+.idea/
+*.swp
+*.swo
+*~
+
+# ================================
+# Secrets / Credentials
+# ================================
+*.pem
+*.key
+*.p12
+*.p8
+secrets.json
+credentials.json
