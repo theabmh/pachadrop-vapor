@@ -12,6 +12,7 @@ struct CreateProduct: AsyncMigration {
             .field("image_urls", .array(of: .string), .required)
             .field("created_at", .datetime)
             .field("updated_at", .datetime)
+            .field("deleted_at", .datetime)
             .create()
     }
 

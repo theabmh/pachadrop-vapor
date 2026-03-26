@@ -1,53 +1,147 @@
 {
   "info": {
     "name": "E-Commerce API",
-    "description": "Complete e-commerce backend API for local testing",
+    "description": "Complete e-commerce backend API for local testing. All routes are under /api/v1. Run requests in order for the happy-path flow: Login → Browse → Add to Cart → Checkout → Pay.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/health",
+              "host": ["{{base_url}}"],
+              "path": ["health"]
+            },
+            "description": "Returns server and database health status. No auth required."
+          }
+        },
+        {
+          "name": "Root",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/",
+              "host": ["{{base_url}}"],
+              "path": [""]
+            },
+            "description": "Returns API version info."
+          }
+        }
+      ]
+    },
     {
       "name": "Authentication",
       "item": [
         {
           "name": "Register User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.data && res.data.token) {",
+                  "    pm.environment.set('auth_token', res.data.token);",
+                  "    pm.environment.set('user_id', res.data.user_id);",
+                  "    console.log('Token and user_id saved to environment');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
+              { "key": "Content-Type", "value": "application/json" }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"full_name\": \"John Doe\",\n  \"email\": \"john@example.com\",\n  \"password\": \"password123\"\n}"
+              "raw": "{\n  \"full_name\": \"Jane Doe\",\n  \"email\": \"jane@example.com\",\n  \"password\": \"password123\"\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/auth/register",
+              "raw": "{{base_url}}/api/v1/auth/register",
               "host": ["{{base_url}}"],
-              "path": ["api", "auth", "register"]
-            }
+              "path": ["api", "v1", "auth", "register"]
+            },
+            "description": "Register a new customer account. Returns a JWT token. Rate-limited to 10 requests/min."
           }
         },
         {
-          "name": "Login",
+          "name": "Login (Admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.data && res.data.token) {",
+                  "    pm.environment.set('auth_token', res.data.token);",
+                  "    pm.environment.set('user_id', res.data.user_id);",
+                  "    console.log('Admin token saved. Role:', res.data.role);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
+              { "key": "Content-Type", "value": "application/json" }
             ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"email\": \"admin@example.com\",\n  \"password\": \"admin123\"\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/auth/login",
+              "raw": "{{base_url}}/api/v1/auth/login",
               "host": ["{{base_url}}"],
-              "path": ["api", "auth", "login"]
+              "path": ["api", "v1", "auth", "login"]
+            },
+            "description": "Login as the seeded admin user. Saves token and user_id to environment automatically."
+          }
+        },
+        {
+          "name": "Login (Customer)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.data && res.data.token) {",
+                  "    pm.environment.set('auth_token', res.data.token);",
+                  "    pm.environment.set('user_id', res.data.user_id);",
+                  "    console.log('Customer token saved. Role:', res.data.role);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
             }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"jane@example.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "auth", "login"]
+            },
+            "description": "Login as a customer. Use after registering via 'Register User'."
           }
         }
       ]
@@ -57,14 +151,30 @@
       "item": [
         {
           "name": "List Categories",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.data && res.data.length > 0) {",
+                  "    pm.environment.set('category_id', res.data[0].id);",
+                  "    console.log('category_id set to:', res.data[0].id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{base_url}}/api/categories",
+              "raw": "{{base_url}}/api/v1/categories",
               "host": ["{{base_url}}"],
-              "path": ["api", "categories"]
-            }
+              "path": ["api", "v1", "categories"]
+            },
+            "description": "Public endpoint. Returns all categories. Saves first category ID to environment."
           }
         },
         {
@@ -73,10 +183,11 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{base_url}}/api/categories/{{category_id}}",
+              "raw": "{{base_url}}/api/v1/categories/{{category_id}}",
               "host": ["{{base_url}}"],
-              "path": ["api", "categories", "{{category_id}}"]
-            }
+              "path": ["api", "v1", "categories", "{{category_id}}"]
+            },
+            "description": "Public endpoint. Fetch a single category by ID."
           }
         },
         {
@@ -84,24 +195,19 @@
           "request": {
             "method": "POST",
             "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{auth_token}}"
-              }
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Electronics\",\n  \"description\": \"Electronic devices and gadgets\"\n}"
+              "raw": "{\n  \"name\": \"Sports & Outdoors\",\n  \"description\": \"Equipment and gear for sports and outdoor activities\"\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/categories",
+              "raw": "{{base_url}}/api/v1/categories",
               "host": ["{{base_url}}"],
-              "path": ["api", "categories"]
-            }
+              "path": ["api", "v1", "categories"]
+            },
+            "description": "Admin only. Requires Bearer token from admin login."
           }
         },
         {
@@ -109,24 +215,19 @@
           "request": {
             "method": "PUT",
             "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{auth_token}}"
-              }
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Updated Electronics\",\n  \"description\": \"Updated description\"\n}"
+              "raw": "{\n  \"name\": \"Consumer Electronics\",\n  \"description\": \"Updated description for electronics\"\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/categories/{{category_id}}",
+              "raw": "{{base_url}}/api/v1/categories/{{category_id}}",
               "host": ["{{base_url}}"],
-              "path": ["api", "categories", "{{category_id}}"]
-            }
+              "path": ["api", "v1", "categories", "{{category_id}}"]
+            },
+            "description": "Admin only. Both fields are optional — send only the ones you want to update."
           }
         },
         {
@@ -134,16 +235,14 @@
           "request": {
             "method": "DELETE",
             "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{auth_token}}"
-              }
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" }
             ],
             "url": {
-              "raw": "{{base_url}}/api/categories/{{category_id}}",
+              "raw": "{{base_url}}/api/v1/categories/{{category_id}}",
               "host": ["{{base_url}}"],
-              "path": ["api", "categories", "{{category_id}}"]
-            }
+              "path": ["api", "v1", "categories", "{{category_id}}"]
+            },
+            "description": "Admin only. Fails with 409 if the category has associated products."
           }
         }
       ]
@@ -153,29 +252,36 @@
       "item": [
         {
           "name": "List Products",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.data && res.data.items && res.data.items.length > 0) {",
+                  "    pm.environment.set('product_id', res.data.items[0].id);",
+                  "    console.log('product_id set to:', res.data.items[0].id);",
+                  "    console.log('Total products:', res.data.total, '| Pages:', res.data.total_pages);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{base_url}}/api/products?limit=20&offset=0",
+              "raw": "{{base_url}}/api/v1/products?page=1&per_page=20",
               "host": ["{{base_url}}"],
-              "path": ["api", "products"],
+              "path": ["api", "v1", "products"],
               "query": [
-                {
-                  "key": "limit",
-                  "value": "20"
-                },
-                {
-                  "key": "offset",
-                  "value": "0"
-                },
-                {
-                  "key": "category_id",
-                  "value": "{{category_id}}",
-                  "disabled": true
-                }
+                { "key": "page", "value": "1" },
+                { "key": "per_page", "value": "20" },
+                { "key": "category_id", "value": "{{category_id}}", "disabled": true }
               ]
-            }
+            },
+            "description": "Public endpoint. Paginated. Use page/per_page (max 100). Enable category_id query param to filter by category. Saves first product ID to environment."
           }
         },
         {
@@ -184,10 +290,11 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{base_url}}/api/products/{{product_id}}",
+              "raw": "{{base_url}}/api/v1/products/{{product_id}}",
               "host": ["{{base_url}}"],
-              "path": ["api", "products", "{{product_id}}"]
-            }
+              "path": ["api", "v1", "products", "{{product_id}}"]
+            },
+            "description": "Public endpoint. Fetch a single product by ID."
           }
         },
         {
@@ -195,24 +302,19 @@
           "request": {
             "method": "POST",
             "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{auth_token}}"
-              }
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"iPhone 15 Pro\",\n  \"description\": \"Latest iPhone with advanced features\",\n  \"price\": 999.99,\n  \"stock_quantity\": 100,\n  \"category_id\": \"{{category_id}}\",\n  \"image_urls\": [\n    \"https://via.placeholder.com/300?text=iPhone\"\n  ]\n}"
+              "raw": "{\n  \"name\": \"AirPods Pro\",\n  \"description\": \"Noise-cancelling wireless earbuds\",\n  \"price\": 249.99,\n  \"stock_quantity\": 75,\n  \"category_id\": \"{{category_id}}\",\n  \"image_urls\": [\n    \"https://via.placeholder.com/300?text=AirPods\"\n  ]\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/products",
+              "raw": "{{base_url}}/api/v1/products",
               "host": ["{{base_url}}"],
-              "path": ["api", "products"]
-            }
+              "path": ["api", "v1", "products"]
+            },
+            "description": "Admin only. category_id must reference an existing category."
           }
         },
         {
@@ -220,24 +322,19 @@
           "request": {
             "method": "PUT",
             "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{auth_token}}"
-              }
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"iPhone 15 Pro Max\",\n  \"description\": \"Updated description\",\n  \"price\": 1099.99,\n  \"stock_quantity\": 150,\n  \"image_urls\": [\n    \"https://via.placeholder.com/300?text=iPhone\"\n  ]\n}"
+              "raw": "{\n  \"name\": \"AirPods Pro (2nd Gen)\",\n  \"description\": \"Updated noise-cancelling earbuds\",\n  \"price\": 279.99,\n  \"stock_quantity\": 100,\n  \"image_urls\": [\n    \"https://via.placeholder.com/300?text=AirPods2\"\n  ]\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/products/{{product_id}}",
+              "raw": "{{base_url}}/api/v1/products/{{product_id}}",
               "host": ["{{base_url}}"],
-              "path": ["api", "products", "{{product_id}}"]
-            }
+              "path": ["api", "v1", "products", "{{product_id}}"]
+            },
+            "description": "Admin only. All fields are optional — send only the ones you want to update."
           }
         },
         {
@@ -245,16 +342,14 @@
           "request": {
             "method": "DELETE",
             "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{auth_token}}"
-              }
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" }
             ],
             "url": {
-              "raw": "{{base_url}}/api/products/{{product_id}}",
+              "raw": "{{base_url}}/api/v1/products/{{product_id}}",
               "host": ["{{base_url}}"],
-              "path": ["api", "products", "{{product_id}}"]
-            }
+              "path": ["api", "v1", "products", "{{product_id}}"]
+            },
+            "description": "Admin only. Soft-deletes the product."
           }
         }
       ]
@@ -267,41 +362,49 @@
           "request": {
             "method": "GET",
             "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{auth_token}}"
-              }
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" }
             ],
             "url": {
-              "raw": "{{base_url}}/api/cart",
+              "raw": "{{base_url}}/api/v1/cart",
               "host": ["{{base_url}}"],
-              "path": ["api", "cart"]
-            }
+              "path": ["api", "v1", "cart"]
+            },
+            "description": "Returns the current user's cart. Creates an empty cart if none exists."
           }
         },
         {
           "name": "Add Item to Cart",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.data && res.data.items && res.data.items.length > 0) {",
+                  "    pm.environment.set('cart_item_id', res.data.items[0].id);",
+                  "    console.log('cart_item_id set to:', res.data.items[0].id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{auth_token}}"
-              }
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" }
             ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"product_id\": \"{{product_id}}\",\n  \"quantity\": 2\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/cart/items",
+              "raw": "{{base_url}}/api/v1/cart/items",
               "host": ["{{base_url}}"],
-              "path": ["api", "cart", "items"]
-            }
+              "path": ["api", "v1", "cart", "items"]
+            },
+            "description": "Adds a product to the cart. If the product is already in the cart, the quantity is incremented. Returns the full updated cart."
           }
         },
         {
@@ -309,24 +412,19 @@
           "request": {
             "method": "PUT",
             "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{auth_token}}"
-              }
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" }
             ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"quantity\": 5\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/cart/items/{{cart_item_id}}",
+              "raw": "{{base_url}}/api/v1/cart/items/{{cart_item_id}}",
               "host": ["{{base_url}}"],
-              "path": ["api", "cart", "items", "{{cart_item_id}}"]
-            }
+              "path": ["api", "v1", "cart", "items", "{{cart_item_id}}"]
+            },
+            "description": "Set an exact new quantity for a cart item. Returns the full updated cart."
           }
         },
         {
@@ -334,16 +432,14 @@
           "request": {
             "method": "DELETE",
             "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{auth_token}}"
-              }
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" }
             ],
             "url": {
-              "raw": "{{base_url}}/api/cart/items/{{cart_item_id}}",
+              "raw": "{{base_url}}/api/v1/cart/items/{{cart_item_id}}",
               "host": ["{{base_url}}"],
-              "path": ["api", "cart", "items", "{{cart_item_id}}"]
-            }
+              "path": ["api", "v1", "cart", "items", "{{cart_item_id}}"]
+            },
+            "description": "Removes a single item from the cart. Returns the full updated cart."
           }
         },
         {
@@ -351,16 +447,14 @@
           "request": {
             "method": "DELETE",
             "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{auth_token}}"
-              }
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" }
             ],
             "url": {
-              "raw": "{{base_url}}/api/cart",
+              "raw": "{{base_url}}/api/v1/cart",
               "host": ["{{base_url}}"],
-              "path": ["api", "cart"]
-            }
+              "path": ["api", "v1", "cart"]
+            },
+            "description": "Deletes all items from the cart. Returns 204 with no data."
           }
         }
       ]
@@ -369,62 +463,33 @@
       "name": "Orders",
       "item": [
         {
-          "name": "List Orders",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{auth_token}}"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/api/orders",
-              "host": ["{{base_url}}"],
-              "path": ["api", "orders"]
-            }
-          }
-        },
-        {
-          "name": "Get Order Details",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{auth_token}}"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/api/orders/{{order_id}}",
-              "host": ["{{base_url}}"],
-              "path": ["api", "orders", "{{order_id}}"]
-            }
-          }
-        },
-        {
           "name": "Checkout (Create Order)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.data && res.data.id) {",
+                  "    pm.environment.set('order_id', res.data.id);",
+                  "    console.log('order_id set to:', res.data.id, '| Status:', res.data.status);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{auth_token}}"
-              }
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" }
             ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"shipping_address\": \"123 Main St, New York, NY 10001\"\n}"
-            },
             "url": {
-              "raw": "{{base_url}}/api/orders/checkout",
+              "raw": "{{base_url}}/api/v1/orders/checkout",
               "host": ["{{base_url}}"],
-              "path": ["api", "orders", "checkout"]
-            }
+              "path": ["api", "v1", "orders", "checkout"]
+            },
+            "description": "Converts the current cart into an order with status 'pending'. Deducts stock and clears the cart atomically. Saves order_id to environment."
           }
         },
         {
@@ -432,59 +497,61 @@
           "request": {
             "method": "POST",
             "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{auth_token}}"
-              }
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" }
             ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"payment_method\": \"credit_card\"\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/orders/{{order_id}}/pay",
+              "raw": "{{base_url}}/api/v1/orders/{{order_id}}/pay",
               "host": ["{{base_url}}"],
-              "path": ["api", "orders", "{{order_id}}", "pay"]
-            }
+              "path": ["api", "v1", "orders", "{{order_id}}", "pay"]
+            },
+            "description": "Marks a 'pending' order as 'paid'. Only works on orders in pending status."
+          }
+        },
+        {
+          "name": "List Orders",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/orders",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "orders"]
+            },
+            "description": "Customers see only their own orders. Admins see all orders."
+          }
+        },
+        {
+          "name": "Get Order Details",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/orders/{{order_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "orders", "{{order_id}}"]
+            },
+            "description": "Customers can only access their own orders. Admins can access any order."
           }
         }
       ]
     }
   ],
   "variable": [
-    {
-      "key": "base_url",
-      "value": "http://localhost:8080",
-      "type": "string"
-    },
-    {
-      "key": "auth_token",
-      "value": "",
-      "type": "string"
-    },
-    {
-      "key": "category_id",
-      "value": "",
-      "type": "string"
-    },
-    {
-      "key": "product_id",
-      "value": "",
-      "type": "string"
-    },
-    {
-      "key": "cart_item_id",
-      "value": "",
-      "type": "string"
-    },
-    {
-      "key": "order_id",
-      "value": "",
-      "type": "string"
-    }
+    { "key": "base_url", "value": "http://localhost:8080", "type": "string" },
+    { "key": "auth_token", "value": "", "type": "string" },
+    { "key": "user_id", "value": "", "type": "string" },
+    { "key": "category_id", "value": "", "type": "string" },
+    { "key": "product_id", "value": "", "type": "string" },
+    { "key": "cart_item_id", "value": "", "type": "string" },
+    { "key": "order_id", "value": "", "type": "string" }
   ]
 }

@@ -7,6 +7,7 @@ struct CreateCategory: AsyncMigration {
             .field("name", .string, .required)
             .field("description", .string, .required)
             .field("created_at", .datetime)
+            .field("deleted_at", .datetime)
             .create()
     }
 

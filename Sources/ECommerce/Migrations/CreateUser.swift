@@ -11,6 +11,7 @@ struct CreateUser: AsyncMigration {
             .field("role", .string, .required)
             .field("created_at", .datetime)
             .field("updated_at", .datetime)
+            .field("deleted_at", .datetime)
             .create()
     }
 

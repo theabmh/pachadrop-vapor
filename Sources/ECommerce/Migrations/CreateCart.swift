@@ -7,6 +7,7 @@ struct CreateCart: AsyncMigration {
             .field("user_id", .uuid, .required, .references("users", "id", onDelete: .cascade))
             .field("created_at", .datetime)
             .field("updated_at", .datetime)
+            .field("deleted_at", .datetime)
             .unique(on: "user_id")
             .create()
     }
