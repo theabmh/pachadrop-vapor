@@ -64,7 +64,10 @@ struct AuthController: RouteCollection {
         }
 
         // Verify password with bcrypt
-        guard try Bcrypt.verify(loginReq.password, created: user.passwordHash) else {
+        guard let hash = user.passwordHash else {
+            throw Abort(.unauthorized, reason: "This account uses Google Sign-In. Please use the Google login option.")
+        }
+        guard try Bcrypt.verify(loginReq.password, created: hash) else {
             throw Abort(.unauthorized, reason: "Invalid email or password")
         }
 

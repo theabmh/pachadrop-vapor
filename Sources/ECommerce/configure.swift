@@ -4,6 +4,9 @@ import FluentPostgresDriver
 import JWT
 
 public func configure(_ app: Application) async throws {
+    // Load .env file for local development
+    await DotEnvFile.load(path: ".env", fileio: app.fileio)
+
     // Remove default error middleware and use our custom one
     app.middleware = .init()
     app.middleware.use(AppErrorMiddleware())
@@ -28,12 +31,14 @@ public func configure(_ app: Application) async throws {
         }
         app.logger.warning("JWT_SECRET not set — using default development key")
         app.jwt.signers.use(.hs256(key: "dev-secret-change-me-in-production"))
+        configureGoogleOAuth(app)
         configureDatabase(app)
         try await registerMigrations(app)
         try routes(app)
         return
     }
     app.jwt.signers.use(.hs256(key: jwtSecret))
+    configureGoogleOAuth(app)
 
     // Configure PostgreSQL database
     configureDatabase(app)
@@ -64,6 +69,17 @@ private func configureDatabase(_ app: Application) {
     )
 }
 
+private func configureGoogleOAuth(_ app: Application) {
+    guard let clientId = Environment.get("GOOGLE_CLIENT_ID") else {
+        if app.environment == .production {
+            fatalError("GOOGLE_CLIENT_ID environment variable is required in production")
+        }
+        app.logger.warning("GOOGLE_CLIENT_ID not set — Google OAuth audience check will be skipped in development")
+        return
+    }
+    app.jwt.google.applicationIdentifier = clientId
+}
+
 private func registerMigrations(_ app: Application) async throws {
     app.migrations.add(CreateUser())
     app.migrations.add(CreateCategory())
@@ -74,6 +90,7 @@ private func registerMigrations(_ app: Application) async throws {
     app.migrations.add(CreateOrderItem())
     app.migrations.add(SeedDatabase())
     app.migrations.add(AddIndexes())
+    app.migrations.add(AddGoogleAuthToUser())
 
     try await app.autoMigrate()
 }

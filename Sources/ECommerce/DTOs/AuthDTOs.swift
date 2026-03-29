@@ -23,6 +23,18 @@ struct LoginRequest: Content {
     let password: String
 }
 
+struct GoogleAuthRequest: Content, Validatable {
+    let idToken: String
+
+    enum CodingKeys: String, CodingKey {
+        case idToken = "id_token"
+    }
+
+    static func validations(_ validations: inout Validations) {
+        validations.add("id_token", as: String.self, is: !.empty, customFailureDescription: "Google ID token is required")
+    }
+}
+
 struct AuthResponse: Content {
     let userId: UUID
     let email: String

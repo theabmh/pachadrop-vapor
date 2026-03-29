@@ -7,6 +7,11 @@ enum UserRole: String, Codable {
     case customer
 }
 
+enum AuthProvider: String, Codable {
+    case email
+    case google
+}
+
 final class User: Model, Content {
     static let schema = "users"
 
@@ -19,11 +24,17 @@ final class User: Model, Content {
     @Field(key: "email")
     var email: String
 
-    @Field(key: "password_hash")
-    var passwordHash: String
+    @OptionalField(key: "password_hash")
+    var passwordHash: String?
 
     @Field(key: "role")
     var role: UserRole
+
+    @Field(key: "auth_provider")
+    var authProvider: AuthProvider
+
+    @OptionalField(key: "google_id")
+    var googleId: String?
 
     @Timestamp(key: "created_at", on: .create)
     var createdAt: Date?
@@ -40,14 +51,18 @@ final class User: Model, Content {
         id: UUID? = nil,
         fullName: String,
         email: String,
-        passwordHash: String,
-        role: UserRole = .customer
+        passwordHash: String? = nil,
+        role: UserRole = .customer,
+        authProvider: AuthProvider = .email,
+        googleId: String? = nil
     ) {
         self.id = id
         self.fullName = fullName
         self.email = email
         self.passwordHash = passwordHash
         self.role = role
+        self.authProvider = authProvider
+        self.googleId = googleId
     }
 }
 
@@ -65,14 +80,5 @@ struct UserPayload: JWTPayload {
 
     func verify(using signer: JWTSigner) throws {
         try expiration.verifyNotExpired()
-    }
-}
-
-extension User: ModelAuthenticatable {
-    static let usernameKey = \User.$email
-    static let passwordHashKey = \User.$passwordHash
-
-    func verify(password: String) throws -> Bool {
-        try Bcrypt.verify(password, created: passwordHash)
     }
 }

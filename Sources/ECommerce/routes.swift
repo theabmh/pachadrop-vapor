@@ -14,6 +14,7 @@ func routes(_ app: Application) throws {
 
     // API v1 controllers
     try app.register(collection: AuthController())
+    try app.register(collection: GoogleAuthController())
     try app.register(collection: CategoryController())
     try app.register(collection: ProductController())
     try app.register(collection: CartController())
