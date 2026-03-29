@@ -8,6 +8,14 @@ struct ProductResponse: Content {
     let stockQuantity: Int
     let categoryId: UUID
     let imageUrls: [String]
+    let subtitle: String?
+    let detailDescription: String?
+    let variant: String?
+    let emoji: String?
+    let cardTintHex: String?
+    let imageURL: String?
+    let savingsPercentage: Int?
+    let deliveryInfo: String?
     let createdAt: Date?
     let updatedAt: Date?
 
@@ -19,6 +27,14 @@ struct ProductResponse: Content {
         self.stockQuantity = product.stockQuantity
         self.categoryId = product.$category.id
         self.imageUrls = product.imageUrls
+        self.subtitle = product.subtitle
+        self.detailDescription = product.detailDescription
+        self.variant = product.variant
+        self.emoji = product.emoji
+        self.cardTintHex = product.cardTintHex
+        self.imageURL = product.imageURL
+        self.savingsPercentage = product.savingsPercentage
+        self.deliveryInfo = product.deliveryInfo
         self.createdAt = product.createdAt
         self.updatedAt = product.updatedAt
     }
@@ -45,6 +61,14 @@ struct CreateProductRequest: Content, Validatable {
     let stockQuantity: Int
     let categoryId: UUID
     let imageUrls: [String]?
+    let subtitle: String?
+    let detailDescription: String?
+    let variant: String?
+    let emoji: String?
+    let cardTintHex: String?
+    let imageURL: String?
+    let savingsPercentage: Int?
+    let deliveryInfo: String?
 
     enum CodingKeys: String, CodingKey {
         case name
@@ -53,6 +77,14 @@ struct CreateProductRequest: Content, Validatable {
         case stockQuantity = "stock_quantity"
         case categoryId = "category_id"
         case imageUrls = "image_urls"
+        case subtitle
+        case detailDescription = "detail_description"
+        case variant
+        case emoji
+        case cardTintHex = "card_tint_hex"
+        case imageURL = "image_url"
+        case savingsPercentage = "savings_percentage"
+        case deliveryInfo = "delivery_info"
     }
 
     static func validations(_ validations: inout Validations) {
@@ -68,6 +100,14 @@ struct UpdateProductRequest: Content {
     let price: Double?
     let stockQuantity: Int?
     let imageUrls: [String]?
+    let subtitle: String?
+    let detailDescription: String?
+    let variant: String?
+    let emoji: String?
+    let cardTintHex: String?
+    let imageURL: String?
+    let savingsPercentage: Int?
+    let deliveryInfo: String?
 
     enum CodingKeys: String, CodingKey {
         case name
@@ -75,5 +115,13 @@ struct UpdateProductRequest: Content {
         case price
         case stockQuantity = "stock_quantity"
         case imageUrls = "image_urls"
+        case subtitle
+        case detailDescription = "detail_description"
+        case variant
+        case emoji
+        case cardTintHex = "card_tint_hex"
+        case imageURL = "image_url"
+        case savingsPercentage = "savings_percentage"
+        case deliveryInfo = "delivery_info"
     }
 }

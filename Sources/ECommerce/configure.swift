@@ -5,7 +5,7 @@ import JWT
 
 public func configure(_ app: Application) async throws {
     // Load .env file for local development
-    await DotEnvFile.load(path: ".env", fileio: app.fileio)
+    await DotEnvFile.load(path: ".env", fileio: app.fileio, logger: app.logger)
 
     // Remove default error middleware and use our custom one
     app.middleware = .init()
@@ -91,6 +91,8 @@ private func registerMigrations(_ app: Application) async throws {
     app.migrations.add(SeedDatabase())
     app.migrations.add(AddIndexes())
     app.migrations.add(AddGoogleAuthToUser())
+    app.migrations.add(AddProductFields())
+    app.migrations.add(SeedHydroponicsData())
 
     try await app.autoMigrate()
 }

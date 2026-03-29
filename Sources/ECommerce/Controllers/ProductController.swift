@@ -81,7 +81,15 @@ struct ProductController: RouteCollection {
             price: createReq.price,
             stockQuantity: createReq.stockQuantity,
             categoryID: createReq.categoryId,
-            imageUrls: createReq.imageUrls ?? []
+            imageUrls: createReq.imageUrls ?? [],
+            subtitle: createReq.subtitle,
+            detailDescription: createReq.detailDescription,
+            variant: createReq.variant,
+            emoji: createReq.emoji,
+            cardTintHex: createReq.cardTintHex,
+            imageURL: createReq.imageURL,
+            savingsPercentage: createReq.savingsPercentage,
+            deliveryInfo: createReq.deliveryInfo
         )
 
         try await product.save(on: req.db)
@@ -120,6 +128,30 @@ struct ProductController: RouteCollection {
         }
         if let imageUrls = updateReq.imageUrls {
             product.imageUrls = imageUrls
+        }
+        if let subtitle = updateReq.subtitle {
+            product.subtitle = subtitle
+        }
+        if let detailDescription = updateReq.detailDescription {
+            product.detailDescription = detailDescription
+        }
+        if let variant = updateReq.variant {
+            product.variant = variant
+        }
+        if let emoji = updateReq.emoji {
+            product.emoji = emoji
+        }
+        if let cardTintHex = updateReq.cardTintHex {
+            product.cardTintHex = cardTintHex
+        }
+        if let imageURL = updateReq.imageURL {
+            product.imageURL = imageURL
+        }
+        if let savingsPercentage = updateReq.savingsPercentage {
+            product.savingsPercentage = savingsPercentage
+        }
+        if let deliveryInfo = updateReq.deliveryInfo {
+            product.deliveryInfo = deliveryInfo
         }
 
         try await product.update(on: req.db)

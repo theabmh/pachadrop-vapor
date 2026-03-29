@@ -307,14 +307,14 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"AirPods Pro\",\n  \"description\": \"Noise-cancelling wireless earbuds\",\n  \"price\": 249.99,\n  \"stock_quantity\": 75,\n  \"category_id\": \"{{category_id}}\",\n  \"image_urls\": [\n    \"https://via.placeholder.com/300?text=AirPods\"\n  ]\n}"
+              "raw": "{\n  \"name\": \"AirPods Pro\",\n  \"description\": \"Noise-cancelling wireless earbuds\",\n  \"price\": 249.99,\n  \"stock_quantity\": 75,\n  \"category_id\": \"{{category_id}}\",\n  \"image_urls\": [\n    \"https://via.placeholder.com/300?text=AirPods\"\n  ],\n  \"subtitle\": \"Apple AirPods Pro\",\n  \"detail_description\": \"Industry-leading Active Noise Cancellation with Adaptive Transparency.\",\n  \"variant\": \"White / USB-C\",\n  \"emoji\": \"🎧\",\n  \"card_tint_hex\": \"#F5F5F7\",\n  \"image_url\": \"https://via.placeholder.com/300?text=AirPods\",\n  \"savings_percentage\": 10,\n  \"delivery_info\": \"Free delivery in 2-3 days\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/v1/products",
               "host": ["{{base_url}}"],
               "path": ["api", "v1", "products"]
             },
-            "description": "Admin only. category_id must reference an existing category."
+            "description": "Admin only. category_id must reference an existing category. New optional fields: subtitle, detail_description, variant, emoji, card_tint_hex, image_url, savings_percentage, delivery_info."
           }
         },
         {
@@ -327,14 +327,14 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"AirPods Pro (2nd Gen)\",\n  \"description\": \"Updated noise-cancelling earbuds\",\n  \"price\": 279.99,\n  \"stock_quantity\": 100,\n  \"image_urls\": [\n    \"https://via.placeholder.com/300?text=AirPods2\"\n  ]\n}"
+              "raw": "{\n  \"name\": \"AirPods Pro (2nd Gen)\",\n  \"description\": \"Updated noise-cancelling earbuds\",\n  \"price\": 279.99,\n  \"stock_quantity\": 100,\n  \"image_urls\": [\n    \"https://via.placeholder.com/300?text=AirPods2\"\n  ],\n  \"subtitle\": \"Apple AirPods Pro 2\",\n  \"detail_description\": \"Next-gen ANC with Personalized Spatial Audio.\",\n  \"variant\": \"White / USB-C (2nd Gen)\",\n  \"emoji\": \"🎧\",\n  \"card_tint_hex\": \"#FFFFFF\",\n  \"image_url\": \"https://via.placeholder.com/300?text=AirPods2\",\n  \"savings_percentage\": 15,\n  \"delivery_info\": \"Free delivery in 1-2 days\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/v1/products/{{product_id}}",
               "host": ["{{base_url}}"],
               "path": ["api", "v1", "products", "{{product_id}}"]
             },
-            "description": "Admin only. All fields are optional — send only the ones you want to update."
+            "description": "Admin only. All fields are optional — send only the ones you want to update. Includes new fields: subtitle, detail_description, variant, emoji, card_tint_hex, image_url, savings_percentage, delivery_info."
           }
         },
         {
@@ -455,6 +455,39 @@
               "path": ["api", "v1", "cart"]
             },
             "description": "Deletes all items from the cart. Returns 204 with no data."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Home",
+      "item": [
+        {
+          "name": "Get Home Data (Unauthenticated)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/home",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "home"]
+            },
+            "description": "Public endpoint. Returns all categories with their products and cartItemCount=0 (no auth)."
+          }
+        },
+        {
+          "name": "Get Home Data (Authenticated)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/home",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "home"]
+            },
+            "description": "Authenticated variant. Returns categories with products plus the real cartItemCount for the logged-in user."
           }
         }
       ]

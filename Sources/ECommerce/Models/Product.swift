@@ -25,6 +25,30 @@ final class Product: Model, Content {
     @Field(key: "image_urls")
     var imageUrls: [String]
 
+    @OptionalField(key: "subtitle")
+    var subtitle: String?
+
+    @OptionalField(key: "detail_description")
+    var detailDescription: String?
+
+    @OptionalField(key: "variant")
+    var variant: String?
+
+    @OptionalField(key: "emoji")
+    var emoji: String?
+
+    @OptionalField(key: "card_tint_hex")
+    var cardTintHex: String?
+
+    @OptionalField(key: "image_url")
+    var imageURL: String?
+
+    @OptionalField(key: "savings_percentage")
+    var savingsPercentage: Int?
+
+    @OptionalField(key: "delivery_info")
+    var deliveryInfo: String?
+
     @Timestamp(key: "created_at", on: .create)
     var createdAt: Date?
 
@@ -43,7 +67,15 @@ final class Product: Model, Content {
         price: Double,
         stockQuantity: Int,
         categoryID: UUID,
-        imageUrls: [String] = []
+        imageUrls: [String] = [],
+        subtitle: String? = nil,
+        detailDescription: String? = nil,
+        variant: String? = nil,
+        emoji: String? = nil,
+        cardTintHex: String? = nil,
+        imageURL: String? = nil,
+        savingsPercentage: Int? = nil,
+        deliveryInfo: String? = nil
     ) {
         self.id = id
         self.name = name
@@ -52,6 +84,14 @@ final class Product: Model, Content {
         self.stockQuantity = stockQuantity
         self.$category.id = categoryID
         self.imageUrls = imageUrls
+        self.subtitle = subtitle
+        self.detailDescription = detailDescription
+        self.variant = variant
+        self.emoji = emoji
+        self.cardTintHex = cardTintHex
+        self.imageURL = imageURL
+        self.savingsPercentage = savingsPercentage
+        self.deliveryInfo = deliveryInfo
     }
 }
 
