@@ -4,8 +4,10 @@ import FluentPostgresDriver
 import JWT
 
 public func configure(_ app: Application) async throws {
-    // Load .env file for local development
-    await DotEnvFile.load(path: ".env", fileio: app.fileio, logger: app.logger)
+    // Load .env file for local development — try both CWD and the project root
+    // so it works whether launched via `swift run`, Xcode, or a compiled binary.
+    let envPath = app.directory.workingDirectory + ".env"
+    await DotEnvFile.load(path: envPath, fileio: app.fileio, logger: app.logger)
 
     // Remove default error middleware and use our custom one
     app.middleware = .init()
